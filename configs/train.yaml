@@ -4,18 +4,18 @@
 # order of defaults determines the order in which configs override each other
 defaults:
   - _self_
-  - data: mnist
-  - model: mnist
+  - data: fashion_mnist
+  - model: fashion_mnist
   - callbacks: default
-  - logger: null # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
-  - trainer: default
+  - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
+  - trainer: gpu
   - paths: default
   - extras: default
   - hydra: default
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
-  - experiment: null
+  - experiment: fashion_mnist
 
   # config for hyperparameter optimization
   - hparams_search: null
@@ -40,10 +40,10 @@ train: True
 
 # evaluate on test set, using best model weights achieved during training
 # lightning chooses best weights based on the metric specified in checkpoint callback
-test: True
+test: False
 
 # simply provide checkpoint path to resume training
 ckpt_path: null
 
 # seed for random number generators in pytorch, numpy and python.random
-seed: null
+seed: 42

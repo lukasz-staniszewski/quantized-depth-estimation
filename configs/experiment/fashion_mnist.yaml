@@ -1,0 +1,33 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: fashion_mnist
+  - override /model: fashion_mnist
+  - override /callbacks: default
+  - override /trainer: gpu
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["fashion_mnist", "convnet"]
+seed: 420
+
+trainer:
+  min_epochs: 10
+  max_epochs: 20
+  gradient_clip_val: 0.5
+
+model:
+  optimizer:
+    lr: 0.0003
+
+data:
+  batch_size: 128
+
+logger:
+  wandb:
+    tags: ${tags}
+    group: "fashion_mnist"

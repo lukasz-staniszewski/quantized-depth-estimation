@@ -3,14 +3,14 @@ from typing import Any, Dict, Optional, Tuple
 import torch
 from lightning import LightningDataModule
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
-from torchvision.datasets import MNIST
+from torchvision.datasets import FashionMNIST
 from torchvision.transforms import transforms
 
 
-class MNISTDataModule(LightningDataModule):
+class FashionMNISTDataModule(LightningDataModule):
     """`LightningDataModule` for the MNIST dataset.
 
-    The MNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples.
+    The FashionMNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples.
     It is a subset of a larger set available from NIST. The digits have been size-normalized and centered in a
     fixed-size image. The original black and white images from NIST were size normalized to fit in a 20x20 pixel box
     while preserving their aspect ratio. The resulting images contain grey levels as a result of the anti-aliasing
@@ -55,15 +55,15 @@ class MNISTDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/",
-        train_val_test_split: Tuple[int, int, int] = (55_000, 5_000, 10_000),
+        train_val_test_split: Tuple[float, float, float] = (0.85, 0.15, 0.0),
         batch_size: int = 64,
-        num_workers: int = 0,
+        num_workers: int = 1,
         pin_memory: bool = False,
     ) -> None:
-        """Initialize a `MNISTDataModule`.
+        """Initialize a `FashionMNISTDataModule`.
 
         :param data_dir: The data directory. Defaults to `"data/"`.
-        :param train_val_test_split: The train, validation and test split. Defaults to `(55_000, 5_000, 10_000)`.
+        :param train_val_test_split: The train, validation and test split.
         :param batch_size: The batch size. Defaults to `64`.
         :param num_workers: The number of workers. Defaults to `0`.
         :param pin_memory: Whether to pin memory. Defaults to `False`.
@@ -76,7 +76,7 @@ class MNISTDataModule(LightningDataModule):
 
         # data transformations
         self.transforms = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+            [transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))]
         )
 
         self.data_train: Optional[Dataset] = None
@@ -89,7 +89,7 @@ class MNISTDataModule(LightningDataModule):
     def num_classes(self) -> int:
         """Get the number of classes.
 
-        :return: The number of MNIST classes (10).
+        :return: The number of FashionMNIST classes (10).
         """
         return 10
 
@@ -101,8 +101,8 @@ class MNISTDataModule(LightningDataModule):
 
         Do not use it to assign state (self.x = y).
         """
-        MNIST(self.hparams.data_dir, train=True, download=True)
-        MNIST(self.hparams.data_dir, train=False, download=True)
+        FashionMNIST(self.hparams.data_dir, train=True, download=True)
+        FashionMNIST(self.hparams.data_dir, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
@@ -126,15 +126,15 @@ class MNISTDataModule(LightningDataModule):
 
         # load and split datasets only if not loaded already
         if not self.data_train and not self.data_val and not self.data_test:
-            trainset = MNIST(
+            trainset = FashionMNIST(
                 self.hparams.data_dir, train=True, transform=self.transforms
             )
-            testset = MNIST(
+            testset = FashionMNIST(
                 self.hparams.data_dir, train=False, transform=self.transforms
             )
-            dataset = ConcatDataset(datasets=[trainset, testset])
-            self.data_train, self.data_val, self.data_test = random_split(
-                dataset=dataset,
+            self.data_test = testset
+            self.data_train, self.data_val, _ = random_split(
+                dataset=trainset,
                 lengths=self.hparams.train_val_test_split,
                 generator=torch.Generator().manual_seed(42),
             )
@@ -204,4 +204,4 @@ class MNISTDataModule(LightningDataModule):
 
 
 if __name__ == "__main__":
-    _ = MNISTDataModule()
+    _ = FashionMNISTDataModule()
