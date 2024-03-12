@@ -30,13 +30,6 @@ repos:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
 
-  # python upgrading syntax to newer version
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
-    hooks:
-      - id: pyupgrade
-        args: [--py38-plus]
-
   # python docstring formatting
   - repo: https://github.com/myint/docformatter
     rev: v1.7.4
@@ -56,8 +49,7 @@ repos:
     rev: 1.5.0 # or master if you're bold
     hooks:
       - id: interrogate
-        args:
-          [
+        args: [
             --verbose,
             # --fail-under=80,
             --ignore-init-module,
