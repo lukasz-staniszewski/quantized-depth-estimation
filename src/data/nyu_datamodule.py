@@ -7,6 +7,7 @@ import torch
 from albumentations.pytorch import ToTensorV2
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
+from tqdm import tqdm
 
 from data.components.nyu_dataset import NYUDataset
 
@@ -126,11 +127,12 @@ class NYUDataModule(LightningDataModule):
             train_csv_path = os.path.join(self.hparams.data_dir, "data/nyu2_train.csv")
             test_csv_path = os.path.join(self.hparams.data_dir, "data/nyu2_test.csv")
             df_train = pd.read_csv(train_csv_path, header=None)
-            df_train[0] = df_train[0].map(lambda x: os.path.join(self.hparams.data_dir, x))
-            df_train[1] = df_train[1].map(lambda x: os.path.join(self.hparams.data_dir, x))
             df_test = pd.read_csv(test_csv_path, header=None)
-            df_test[0] = df_test[0].map(lambda x: os.path.join(self.hparams.data_dir, x))
-            df_test[1] = df_test[1].map(lambda x: os.path.join(self.hparams.data_dir, x))
+            tqdm.pandas()
+            df_train[0] = df_train[0].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
+            df_train[1] = df_train[1].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
+            df_test[0] = df_test[0].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
+            df_test[1] = df_test[1].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
 
             trainset = NYUDataset(df=df_train, tfms=self.train_transforms)
             testset = NYUDataset(df=df_test, tfms=self.valid_tfms)

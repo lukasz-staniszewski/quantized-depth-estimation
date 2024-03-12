@@ -19,8 +19,8 @@ net:
   trainable_encoder: false
 
 trainer:
-  min_epochs: 5
-  max_epochs: 25
+  min_epochs: 1
+  max_epochs: 2
   gradient_clip_val: 2
 
 logger:
@@ -29,4 +29,4 @@ logger:
     group: "nyu_unet"
 
 data:
-  batch_size: 64
+  batch_size: 96

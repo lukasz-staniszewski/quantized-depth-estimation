@@ -11,11 +11,11 @@ scheduler:
   _partial_: true
   max_lr: 0.001
   epochs: 20
-  steps_per_epoch: 600
+  steps_per_epoch: 400
 
 net:
   _target_: src.models.components.unet.UNet
-  trainable_encoder: false
+  trainable_encoder: true
 
 # compile model for faster training with pytorch 2.0
-compile: true
+compile: false
