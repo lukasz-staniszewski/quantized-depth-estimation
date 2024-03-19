@@ -6,7 +6,7 @@ class BiFPNDecoder(nn.Module):
     """BiFPN type decoder: https://arxiv.org/pdf/1911.09070v7.pdf (only 3 middle layers: P6, P5, P4)."""
 
     def __init__(self, fpn_sizes):
-        super().__init__()
+        super(BiFPNDecoder, self).__init__()
 
         P4_channels, P5_channels, P6_channels = fpn_sizes
         self.W_bifpn = 64

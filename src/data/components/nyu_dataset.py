@@ -1,18 +1,20 @@
-from typing import List
+from typing import List, Tuple
 
 import cv2 as cv
 from pandas import DataFrame
 from torch.utils.data import Dataset
+from torchvision import transforms as T
 
 
 class NYUDataset(Dataset):
     """NYU Depth V2 Dataset from https://www.kaggle.com/datasets/soumikrakshit/nyu-depth-v2"""
 
-    def __init__(self, df: DataFrame, tfms: List):
+    def __init__(self, df: DataFrame, tfms: List, mask_final_size: Tuple[int, int]):
         super().__init__()
         """Constructor of the NYUDataset class."""
         self.df = df
         self.tfms = tfms
+        self.mask_final_size = mask_final_size
 
     def open_im(self, path: str, gray: bool = False):
         """Opens image from specific path.
@@ -36,4 +38,5 @@ class NYUDataset(Dataset):
         image, depth_image = self.open_im(path=image), self.open_im(path=depth_image, gray=True)
         augs = self.tfms(image=image, mask=depth_image)
         image, depth_image = augs["image"], augs["mask"] / 255.0
-        return image, depth_image.unsqueeze(0)
+        depth_image = T.Resize(size=self.mask_final_size)(depth_image.unsqueeze(0))
+        return image, depth_image
