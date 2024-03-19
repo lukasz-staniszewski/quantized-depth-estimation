@@ -1,0 +1,2 @@
+log_pred_samples:
+  _target_: src.utils.callbacks.LogPredictionSamplesCallback

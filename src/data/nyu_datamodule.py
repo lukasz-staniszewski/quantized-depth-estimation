@@ -9,7 +9,7 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from tqdm import tqdm
 
-from data.components.nyu_dataset import NYUDataset
+from src.data.components.nyu_dataset import NYUDataset
 
 
 class NYUDataModule(LightningDataModule):
@@ -142,6 +142,7 @@ class NYUDataModule(LightningDataModule):
                 lengths=self.hparams.train_val_test_split,
                 generator=torch.Generator().manual_seed(42),
             )
+
             self.data_val.tfms = self.valid_tfms
             self.data_test = testset
 
