@@ -80,12 +80,12 @@ class NYUDataModule(LightningDataModule):
                 A.RandomBrightnessContrast(),
                 A.RandomResizedCrop(150, 150),
                 A.ColorJitter(),
-                A.Resize(224, 224),
+                A.Resize(128, 128),
                 A.Normalize(always_apply=True),
                 ToTensorV2(),
             ]
         )
-        self.valid_tfms = A.Compose([A.Resize(224, 224), A.Normalize(always_apply=True), ToTensorV2()])
+        self.valid_tfms = A.Compose([A.Resize(128, 128), A.Normalize(always_apply=True), ToTensorV2()])
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
@@ -142,6 +142,7 @@ class NYUDataModule(LightningDataModule):
                 lengths=self.hparams.train_val_test_split,
                 generator=torch.Generator().manual_seed(42),
             )
+
             self.data_val.tfms = self.valid_tfms
             self.data_test = testset
 

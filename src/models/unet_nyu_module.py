@@ -3,10 +3,8 @@ from typing import Any, Dict, Tuple
 import torch
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric, MinMetric
-from torchmetrics.classification.accuracy import Accuracy
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 from torchmetrics.regression import MeanSquaredError
-from torchvision.transforms import Normalize
 
 
 class UNetNYUModule(LightningModule):
@@ -155,6 +153,8 @@ class UNetNYUModule(LightningModule):
         self.log("val/ssim", self.val_ssim, on_step=False, on_epoch=True, prog_bar=True)
         self.log("val/mse", self.val_mse, on_step=False, on_epoch=True, prog_bar=True)
 
+        return preds
+
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
         val_ssim = self.val_ssim.compute()
@@ -180,6 +180,8 @@ class UNetNYUModule(LightningModule):
         self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("test/ssim", self.test_ssim, on_step=False, on_epoch=True, prog_bar=True)
         self.log("test/mse", self.test_mse, on_step=False, on_epoch=True, prog_bar=True)
+
+        return preds
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""

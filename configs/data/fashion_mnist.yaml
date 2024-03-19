@@ -1,6 +1,0 @@
-_target_: src.data.fmnist_datamodule.FashionMNISTDataModule
-data_dir: ${paths.data_dir}
-batch_size: 128 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-train_val_test_split: [0.85,0.15,0.0]
-num_workers: 1
-pin_memory: True
