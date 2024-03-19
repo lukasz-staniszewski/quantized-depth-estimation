@@ -27,8 +27,7 @@ class EffNetBiFPN(nn.Module):
         out_dec_1 = self.decoder_1([p4, p5, p6])
         out_dec_2 = self.decoder_2(out_dec_1)
         cat_out = self.concatenate_bifpn_features(out_dec_2)
-        conv_out = self.final_convolution(cat_out)
-        return self.final_upsample(conv_out)
+        return self.final_layer(cat_out)
 
     def concatenate_bifpn_features(self, out_bfpn3):
         """Concatenates features coming from BiFPN."""
