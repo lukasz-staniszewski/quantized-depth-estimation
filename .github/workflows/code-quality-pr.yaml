@@ -31,9 +31,10 @@ jobs:
 
       - name: Find modified files
         id: file_changes
-        uses: trilom/file-changes-action@v1.2.4
+        uses: Ana06/get-changed-files@v2.3.0
         with:
-          output: " "
+          format: ""
+          filter: "*"
 
       - name: List modified files
         run: echo '${{ steps.file_changes.outputs.files}}'
