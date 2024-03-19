@@ -9,7 +9,7 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from tqdm import tqdm
 
-from data.components.nyu_dataset import NYUDataset
+from src.data.components.nyu_dataset import NYUDataset
 
 
 class NYUDataModule(LightningDataModule):
@@ -80,12 +80,12 @@ class NYUDataModule(LightningDataModule):
                 A.RandomBrightnessContrast(),
                 A.RandomResizedCrop(150, 150),
                 A.ColorJitter(),
-                A.Resize(128, 128),
+                A.Resize(224, 224),
                 A.Normalize(always_apply=True),
                 ToTensorV2(),
             ]
         )
-        self.valid_tfms = A.Compose([A.Resize(128, 128), A.Normalize(always_apply=True), ToTensorV2()])
+        self.valid_tfms = A.Compose([A.Resize(224, 224), A.Normalize(always_apply=True), ToTensorV2()])
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None

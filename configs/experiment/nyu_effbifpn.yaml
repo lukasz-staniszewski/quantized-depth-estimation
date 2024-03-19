@@ -1,0 +1,32 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: nyu
+  - override /model: effnet_bifpn
+  - override /callbacks: default
+  - override /trainer: gpu
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["nyu", "effnet_bifpn"]
+seed: 420
+
+net:
+  trainable_encoder: false
+
+trainer:
+  min_epochs: 3
+  max_epochs: 5
+  gradient_clip_val: 1
+
+logger:
+  wandb:
+    tags: ${tags}
+    group: "nyu_unet"
+
+data:
+  batch_size: 128

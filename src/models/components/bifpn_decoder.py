@@ -3,7 +3,7 @@ from torch import nn
 
 
 class BiFPNDecoder(nn.Module):
-    """BiFPN type decoder: https://arxiv.org/pdf/1911.09070v7.pdf (only 3 middle connections)."""
+    """BiFPN type decoder: https://arxiv.org/pdf/1911.09070v7.pdf (only 3 middle layers: P6, P5, P4)."""
 
     def __init__(self, fpn_sizes):
         super().__init__()
@@ -11,7 +11,6 @@ class BiFPNDecoder(nn.Module):
         P4_channels, P5_channels, P6_channels = fpn_sizes
         self.W_bifpn = 64
 
-        # self.p6_td_conv  = nn.Conv2d(P6_channels, self.W_bifpn, kernel_size=3, stride=1, groups=self.W_bifpn, bias=True, padding=1)
         self.p6_td_conv = nn.Conv2d(P6_channels, self.W_bifpn, kernel_size=3, stride=1, bias=True, padding=1)
         self.p6_td_conv_2 = nn.Conv2d(
             self.W_bifpn, self.W_bifpn, kernel_size=3, stride=1, groups=self.W_bifpn, bias=True, padding=1
@@ -40,7 +39,6 @@ class BiFPNDecoder(nn.Module):
         self.p4_td_w2 = torch.tensor(1, dtype=torch.float, requires_grad=True)
         self.p5_upsample = nn.Upsample(scale_factor=2, mode="nearest")
 
-        # self.p4_out_conv = nn.Conv2d(P4_channels, self.W_bifpn, kernel_size=3, stride=1, bias=True, padding=1)
         self.p4_out_conv = nn.Conv2d(
             self.W_bifpn, self.W_bifpn, kernel_size=3, stride=1, groups=self.W_bifpn, bias=True, padding=1
         )
@@ -49,7 +47,6 @@ class BiFPNDecoder(nn.Module):
         self.p4_out_w1 = torch.tensor(1, dtype=torch.float, requires_grad=True)
         self.p4_out_w2 = torch.tensor(1, dtype=torch.float, requires_grad=True)
 
-        # self.p5_out_conv = nn.Conv2d(P5_channels,self.W_bifpn, kernel_size=3, stride=1, bias=True, padding=1)
         self.p5_out_conv = nn.Conv2d(
             self.W_bifpn, self.W_bifpn, kernel_size=3, stride=1, groups=self.W_bifpn, bias=True, padding=1
         )
@@ -60,7 +57,6 @@ class BiFPNDecoder(nn.Module):
         self.p5_out_w3 = torch.tensor(1, dtype=torch.float, requires_grad=True)
         self.p4_downsample = nn.MaxPool2d(kernel_size=2)
 
-        # self.p6_out_conv = nn.Conv2d(P6_channels, self.W_bifpn, kernel_size=3, stride=1, bias=True, padding=1)
         self.p6_out_conv = nn.Conv2d(
             self.W_bifpn, self.W_bifpn, kernel_size=3, stride=1, groups=self.W_bifpn, bias=True, padding=1
         )
@@ -73,7 +69,7 @@ class BiFPNDecoder(nn.Module):
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         """Performs forward method."""
-        epsilon = 0.0001
+        epsilon = 1e-4
         P4, P5, P6 = inputs
 
         P6_td_inp = self.p6_td_conv(P6)
