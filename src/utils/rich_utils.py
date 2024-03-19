@@ -47,10 +47,10 @@ def print_config_tree(
         (
             queue.append(field)
             if field in cfg
-            else log.warning(f"Field '{field}' not found in config. Skipping '{field}' config printing...")
+            else log.warning(f"Config lacks field '{field}'. Skipping '{field}' config printing...")
         )
 
-    # add all the other fields to queue (not specified in `print_order`)
+    # add all the other fields to queue (cant find in `print_order`)
     for field in cfg:
         if field not in queue:
             queue.append(field)
