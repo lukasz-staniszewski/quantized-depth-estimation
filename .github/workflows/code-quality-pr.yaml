@@ -31,10 +31,9 @@ jobs:
 
       - name: Find modified files
         id: file_changes
-        uses: Ana06/get-changed-files@v2.3.0
+        uses: jitterbit/get-changed-files@v1
         with:
-          format: "space-delimited"
-          filter: "*"
+          format: ""
 
       - name: List modified files
         run: echo '${{ steps.file_changes.outputs.files}}'
