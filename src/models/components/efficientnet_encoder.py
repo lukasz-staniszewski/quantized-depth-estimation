@@ -9,7 +9,7 @@ class EfficientNetEncoder(nn.Module):
     def __init__(self):
         """Constructs encoder from EfficientNetB0."""
         super().__init__()
-        encoder = models.efficientnet_b0()
+        encoder = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
         features = encoder.features
         num_of_sequences = len(features)
         self.layer1 = features[: num_of_sequences - 6]

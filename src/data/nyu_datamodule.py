@@ -9,7 +9,7 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from tqdm import tqdm
 
-from src.data.components.nyu_dataset import NYUDataset
+from src.data.components.nyu_dataset import NYUDataset, NYUDatasetTest
 
 
 class NYUDataModule(LightningDataModule):
@@ -53,10 +53,11 @@ class NYUDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/nyu_data/",
-        train_val_test_split: Tuple[float, float, float] = (0.85, 0.15, 0.0),
+        train_val_test_split: Tuple[float, float, float] = (0.7, 0.15, 0.15),
         batch_size: int = 64,
         num_workers: int = 1,
         pin_memory: bool = False,
+        input_size: Tuple[int, int] = (224, 224),
     ) -> None:
         """Initialize a `FashionMNISTDataModule`.
 
@@ -80,18 +81,22 @@ class NYUDataModule(LightningDataModule):
                 A.RandomBrightnessContrast(),
                 A.RandomResizedCrop(150, 150),
                 A.ColorJitter(),
-                A.Resize(224, 224),
+                A.Resize(input_size[0], input_size[1]),
                 A.Normalize(always_apply=True),
                 ToTensorV2(),
             ]
         )
-        self.valid_tfms = A.Compose([A.Resize(224, 224), A.Normalize(always_apply=True), ToTensorV2()])
+        self.valid_tfms = A.Compose(
+            [A.Resize(input_size[0], input_size[1]), A.Normalize(always_apply=True), ToTensorV2()]
+        )
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
         self.data_test: Optional[Dataset] = None
 
         self.batch_size_per_device = batch_size
+        self.input_size = input_size
+        self.mask_final_size = (int(input_size[0] / 4), int(input_size[1] / 4))
 
     def prepare_data(self) -> None:
         """Download data if needed. Lightning ensures that `self.prepare_data()` is called only
@@ -134,8 +139,8 @@ class NYUDataModule(LightningDataModule):
             df_test[0] = df_test[0].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
             df_test[1] = df_test[1].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
 
-            trainset = NYUDataset(df=df_train, tfms=self.train_transforms)
-            testset = NYUDataset(df=df_test, tfms=self.valid_tfms)
+            trainset = NYUDataset(df=df_train, tfms=self.train_transforms, mask_final_size=self.mask_final_size)
+            testset = NYUDatasetTest(df=df_test, tfms=self.valid_tfms, mask_final_size=self.mask_final_size)
 
             self.data_train, self.data_val, _ = random_split(
                 dataset=trainset,

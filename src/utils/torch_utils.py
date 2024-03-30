@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from torchvision.transforms import Normalize
+from torchvision.transforms import Normalize, Resize
 
 
 class UnNormalize(Normalize):
@@ -24,7 +24,13 @@ def get_plot_vals(images: torch.Tensor, targets: torch.Tensor, predictions: torc
     fig = plt.figure(figsize=(8, 2), dpi=200)
     for idx in range(6):
         ax = plt.subplot(2, 3, idx + 1)
-        image, mask_target, mask_pred = UnNormalize()(images[idx]), targets[idx], predictions[idx]
+        image = images[idx]
+        image_size = (image.shape[1], image.shape[2])
+        image, mask_target, mask_pred = (
+            UnNormalize()(image),
+            Resize(image_size)(targets[idx]),
+            Resize(image_size)(predictions[idx]),
+        )
         image, mask_target, mask_pred = (
             image.permute(1, 2, 0).numpy(),
             mask_target.permute(1, 2, 0).numpy(),

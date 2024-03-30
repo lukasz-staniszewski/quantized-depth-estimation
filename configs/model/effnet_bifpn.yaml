@@ -3,15 +3,13 @@ _target_: src.models.unet_nyu_module.UNetNYUModule
 optimizer:
   _target_: torch.optim.AdamW
   _partial_: true
-  lr: 0.0004
-  weight_decay: 0.02
+  lr: 0.001
+  weight_decay: 0.01
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.OneCycleLR
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
-  max_lr: 0.001
-  epochs: 20
-  steps_per_epoch: 400
+  patience: 5
 
 net:
   _target_: src.models.components.effnet_bifpn.EffNetBiFPN
