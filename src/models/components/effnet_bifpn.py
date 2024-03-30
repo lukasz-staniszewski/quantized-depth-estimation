@@ -17,10 +17,7 @@ class EffNetBiFPN(nn.Module):
         self.decoder_3 = BiFPNDecoder([64, 64, 64])
         self.upsample_4 = nn.Upsample(scale_factor=4, mode="nearest")
         self.upsample_2 = nn.Upsample(scale_factor=2, mode="nearest")
-        self.final_layer = nn.Sequential(
-            nn.Conv2d(in_channels=64 * 3, out_channels=1, kernel_size=3, padding="same"),
-            # nn.Upsample(scale_factor=4, mode="nearest"),
-        )
+        self.final_layer = nn.Sequential(nn.Conv2d(in_channels=64 * 3, out_channels=1, kernel_size=3, padding="same"))
 
     def forward(self, x):
         """Forwards EffNetBiFPN."""

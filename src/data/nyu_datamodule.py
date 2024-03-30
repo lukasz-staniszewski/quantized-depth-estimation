@@ -9,7 +9,7 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from tqdm import tqdm
 
-from src.data.components.nyu_dataset import NYUDataset
+from src.data.components.nyu_dataset import NYUDataset, NYUDatasetTest
 
 
 class NYUDataModule(LightningDataModule):
@@ -53,7 +53,7 @@ class NYUDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/nyu_data/",
-        train_val_test_split: Tuple[float, float, float] = (0.85, 0.15, 0.0),
+        train_val_test_split: Tuple[float, float, float] = (0.7, 0.15, 0.15),
         batch_size: int = 64,
         num_workers: int = 1,
         pin_memory: bool = False,
@@ -140,7 +140,7 @@ class NYUDataModule(LightningDataModule):
             df_test[1] = df_test[1].progress_map(lambda x: os.path.join(self.hparams.data_dir, x))
 
             trainset = NYUDataset(df=df_train, tfms=self.train_transforms, mask_final_size=self.mask_final_size)
-            testset = NYUDataset(df=df_test, tfms=self.valid_tfms, mask_final_size=self.mask_final_size)
+            testset = NYUDatasetTest(df=df_test, tfms=self.valid_tfms, mask_final_size=self.mask_final_size)
 
             self.data_train, self.data_val, _ = random_split(
                 dataset=trainset,

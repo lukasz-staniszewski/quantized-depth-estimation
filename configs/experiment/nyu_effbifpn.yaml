@@ -16,9 +16,9 @@ tags: ["nyu", "effnet_bifpn"]
 seed: 420
 
 trainer:
-  min_epochs: 3
-  max_epochs: 15
-  gradient_clip_val: 2
+  min_epochs: 5
+  max_epochs: 25
+  gradient_clip_val: 1
 
 logger:
   wandb:
