@@ -13,7 +13,7 @@ Final architecture code can be found [here](https://github.com/lukasz-staniszews
 
 <h2> 2. Training results </h2>
 
-*Setup*: model was trained for 25 epochs on [NYUv2 Depth Dataset](https://www.kaggle.com/datasets/soumikrakshit/nyu-depth-v2). I used AdamW optimizer (with $0.001$ learning rate and $0.01$ weight decay) and ReduceLROnPlateau optimizer. I used gradient clipping to 1. Images have been resized to $[224, 224]$ and outputed masks where of size $[56, 56]$.
+*Setup*: model was trained for 25 epochs on [NYUv2 Depth Dataset](https://www.kaggle.com/datasets/soumikrakshit/nyu-depth-v2). I used AdamW optimizer (with $0.001$ learning rate and $0.01$ weight decay) and ReduceLROnPlateau scheduler. I used gradient clipping to 1. Images have been resized to $[224, 224]$ and outputed masks where of size $[56, 56]$.
 
 Final metrics:
 | Scenario | Train | Validation |
