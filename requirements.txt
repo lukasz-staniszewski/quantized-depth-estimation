@@ -13,9 +13,21 @@ hydra-optuna-sweeper==1.2.0
 # --------- loggers --------- #
 wandb
 
+# --------- quantize -------- #
+TinyNeuralNetwork @ git+https://github.com/alibaba/TinyNeuralNetwork.git@fb56fd944aa80bd48f1ef48970eb07286a64fdad
+
+# --------- notebooks ---------- #
+ipykernel
+jupyter==1.0.0
+notebook==7.1.2
+
 # --------- others --------- #
 rootutils       # standardizing the project root setup
 pre-commit      # hooks for applying linters on commit
 rich            # beautiful text formatting in terminal
 pytest          # tests
 sh            # for running bash commands in some tests (linux/macos only)
+tqdm
+pydantic
+kaggle
+pillow
