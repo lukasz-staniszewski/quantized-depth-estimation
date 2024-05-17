@@ -15,5 +15,7 @@ task_name: "eval"
 
 tags: ["dev"]
 
+inference_speed: True
+
 # passing checkpoint path is necessary for evaluation
 ckpt_path: ???

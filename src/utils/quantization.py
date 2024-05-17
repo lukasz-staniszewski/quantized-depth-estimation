@@ -71,6 +71,7 @@ def create_quantizer(model: torch.nn.Module, quant_config: QuantizerConfig, work
     Returns:
         torch.nn.Module: model with performed bn fusing
     """
+    model = model.eval()
     quantizer = QATQuantizer(
         model=model,
         dummy_input=torch.randn(*quant_config.dummy_input_shape),

@@ -35,8 +35,8 @@ log = RankedLogger(__name__, rank_zero_only=True)
 
 
 def _quantize(
-    model: torch.nn.Module, cfg: DictConfig, datamodule: LightningDataModule, trainer: Trainer
-) -> Tuple[torch.nn.Module, Path]:
+    module: LightningModule, cfg: DictConfig, datamodule: LightningDataModule, trainer: Trainer
+) -> Tuple[LightningModule, Path]:
     """Performs quantization based on chosen methods."""
     log.info("Starting quantization...")
     quant_path = Path(cfg.paths.output_dir) / "quant"
@@ -46,12 +46,14 @@ def _quantize(
     quantizer = None
     ckpt_path = None
     quant_config = QuantizerConfig(**cfg.quantization.quant_config)
+    model = module.net
     if "fuse_bn" in quantization_methods:
         log.info("FuseBatchNorm Quantization...")
         model = quantize_fuse_bn(model)
     if "ptq" in quantization_methods:
         log.info("Performing PTQ...")
         device = "cuda" if cfg.trainer.accelerator == "gpu" else "cpu"
+        datamodule.setup()
         model, quantizer = quantize_PTQ(
             model=model,
             work_dir=quant_path,
@@ -74,10 +76,14 @@ def _quantize(
             model.load_state_dict(ckpt_path)
         log.info("QAT Finished...")
 
-    quantized_model = get_model_quantized(model=model)
+    if quantizer:
+        quantized_model = get_model_quantized(model=model)
+    else:
+        quantized_model = model
     model_path = quant_path / f"{'_'.join(quantization_methods)}_qmodel.pth"
     torch.save(quantized_model.state_dict(), model_path)
-    return quantized_model, model_path
+    module.net = quantized_model
+    return module, model_path
 
 
 @task_wrapper
@@ -99,7 +105,7 @@ def quantize(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
     log.info(f"Instantiating model <{cfg.model._target_}>")
     model: LightningModule = hydra.utils.instantiate(cfg.model)
-    model.load_from_checkpoint(cfg.get("ckpt_path"))
+    model.load_state_dict(torch.load(cfg.get("ckpt_path"))["state_dict"])
 
     log.info(f"Model size before quantization: {get_model_size_mb(model):.3f} MB")
 
@@ -125,15 +131,18 @@ def quantize(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         log.info("Logging hyperparameters!")
         log_hyperparameters(object_dict)
 
-    qmodel, path = _quantize(model=model, cfg=cfg, datamodule=datamodule, trainer=trainer)
+    qmodel, path = _quantize(module=model, cfg=cfg, datamodule=datamodule, trainer=trainer)
     log.info(f"Model size after quantization: {get_model_size_mb(model):.3f} MB")
 
     if cfg.get("test"):
         log.info("Starting testing!")
-        trainer.accelerator = "cpu"
         datamodule.batch_size_per_device = 1
-        trainer.test(model=qmodel, datamodule=datamodule, ckpt_path=path)
+        trainer.test(model=qmodel, datamodule=datamodule, ckpt_path=None)
         log.info(f"Best ckpt path: {path}")
+
+    if cfg.get("inference_speed"):
+        log.info("Calculating mean inference speed...")
+        model.calc_inference_speed()
 
     test_metrics = trainer.callback_metrics
 

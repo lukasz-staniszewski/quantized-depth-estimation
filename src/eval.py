@@ -52,8 +52,9 @@ def evaluate(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     log.info("Starting testing!")
     trainer.test(model=model, datamodule=datamodule, ckpt_path=cfg.ckpt_path)
 
-    # for predictions use trainer.predict(...)
-    # predictions = trainer.predict(model=model, dataloaders=dataloaders, ckpt_path=cfg.ckpt_path)
+    if cfg.get("inference_speed"):
+        log.info("Calculating mean inference speed...")
+        model.calc_inference_speed()
 
     metric_dict = trainer.callback_metrics
 

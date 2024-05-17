@@ -44,13 +44,13 @@ seed: 42
 
 ckpt_path: null
 
+inference_speed: True
+
 quantization:
   methods:
     - "fuse_bn"
-    - "ptq"
-    - "qat"
   ptq:
-    examples_limit: 500
+    examples_limit: 100
   quant_config:
     dummy_input_shape: [1, 3, 224, 224]
     is_per_tensor: True

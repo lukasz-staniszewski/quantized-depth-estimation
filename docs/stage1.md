@@ -7,7 +7,7 @@ Used model architecture is U-Net type architecture consisting of:
 
 1. Encoder: **EfficientNet-B0** (first five layers), taking output from 3rd, 4th and 5th layer.
 
-2. Decoder: 3x **BiFPN** (middle three layers).
+2. Decoder: 3x **BiFPN** (for each, only three middle layers).
 
 Final architecture code can be found [here](https://github.com/lukasz-staniszewski/neural-networks-compression/blob/main/src/models/components/effnet_bifpn.py).
 
@@ -16,10 +16,10 @@ Final architecture code can be found [here](https://github.com/lukasz-staniszews
 *Setup*: model was trained for 25 epochs on [NYUv2 Depth Dataset](https://www.kaggle.com/datasets/soumikrakshit/nyu-depth-v2). I used AdamW optimizer (with $0.001$ learning rate and $0.01$ weight decay) and ReduceLROnPlateau scheduler. I used gradient clipping to 1. Images have been resized to $[224, 224]$ and outputed masks were of size $[56, 56]$.
 
 Final metrics:
-| Metric | Train | Validation |
-|----------|-------|------------|
-| SSIM     | $0.8726$    |     $0.8769$     |
-| MSE      | $0.0028$    |     $0.0025$     |
+| Metric | Train | Validation | Test |
+|----------|-------|------------|-------|
+| SSIM     | $0.8726$    |     $0.8769$     | $0.8090$ |
+| MSE      | $0.0028$    |     $0.0025$     | $0.0083$ |
 
 Example validation set generations:
 
