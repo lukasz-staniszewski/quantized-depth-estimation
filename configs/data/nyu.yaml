@@ -2,6 +2,7 @@ _target_: src.data.nyu_datamodule.NYUDataModule
 data_dir: "${paths.data_dir}/nyu_data/"
 batch_size: 64
 train_val_test_split: [0.85, 0.15, 0.0]
-num_workers: 1
+num_workers: 8
 pin_memory: True
 input_size: [224, 224]
+mask_final_size: [56, 56]

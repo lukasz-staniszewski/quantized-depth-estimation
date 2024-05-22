@@ -1,0 +1,30 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: nyu
+  - override /model: efficient_ffnet
+  - override /callbacks: default
+  - override /trainer: gpu
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["nyu", "efficient_ffnet"]
+seed: 420
+
+trainer:
+  min_epochs: 5
+  max_epochs: 25
+  gradient_clip_val: 1
+
+logger:
+  wandb:
+    tags: ${tags}
+    group: "nyu_efficient_ffnet"
+
+data:
+  batch_size: 64
+  num_workers: 8

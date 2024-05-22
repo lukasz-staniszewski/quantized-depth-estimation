@@ -3,7 +3,7 @@
 defaults:
   - _self_
   - data: nyu
-  - model: effnet_bifpn
+  - model: efficient_ffnet
   - callbacks: default
   - logger: null
   - trainer: gpu

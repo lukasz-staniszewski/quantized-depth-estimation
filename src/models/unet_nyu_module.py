@@ -2,6 +2,8 @@ from typing import Any, Dict, Tuple
 
 import torch
 from lightning import LightningModule
+from torch.profiler import ProfilerActivity, profile, record_function, schedule
+from torch.utils.data import DataLoader
 from torchmetrics import MaxMetric, MeanMetric, MinMetric
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 from torchmetrics.regression import MeanSquaredError
@@ -221,23 +223,6 @@ class UNetNYUModule(LightningModule):
                 },
             }
         return {"optimizer": optimizer}
-
-    def calc_inference_speed(self, steps_limit: int = 1000):
-        """Simulates inference speed."""
-
-        def _trace_handler(prof):
-            print(prof.key_averages().table(sort_by="cpu_time", row_limit=1))
-
-        self.eval()
-        batch = next(iter(self.trainer.test_dataloaders))
-        with torch.profiler.profile(
-            activities=[torch.profiler.ProfilerActivity.CPU],
-            schedule=torch.profiler.schedule(wait=10, warmup=10, active=10, repeat=1),
-            on_trace_ready=_trace_handler,
-        ) as p:
-            for _ in range(steps_limit):
-                self.model_step(batch)
-                p.step()
 
 
 if __name__ == "__main__":

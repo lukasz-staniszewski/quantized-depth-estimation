@@ -16,9 +16,9 @@ class EfficientNetEncoder(nn.Module):
         self.layer2 = features[num_of_sequences - 6]
         self.layer3 = features[num_of_sequences - 5]
 
-    def get_features(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Returns skip connections features from Efficient Net."""
         x1 = self.layer1(x)
         x2 = self.layer2(x1)
         x3 = self.layer3(x2)
-        return x1, x2, x3
+        return x, x1, x2, x3

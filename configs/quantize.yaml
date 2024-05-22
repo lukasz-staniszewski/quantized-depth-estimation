@@ -5,9 +5,9 @@
 defaults:
   - _self_
   - data: nyu
-  - model: effnet_bifpn
+  - model: nyu_efffnet
   - callbacks: default
-  - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
+  - logger: csv # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
   - trainer: gpu
   - paths: default
   - extras: default
@@ -15,7 +15,7 @@ defaults:
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
-  - experiment: nyu_effbifpn
+  - experiment: nyu_efffnet
 
   # config for hyperparameter optimization
   - hparams_search: null
@@ -28,7 +28,8 @@ defaults:
   - debug: null
 
 # task name, determines output directory path
-task_name: "train"
+task_name: "quant"
+logger: csv
 
 # tags to help you identify your experiments
 # you can overwrite this in experiment configs
@@ -49,11 +50,19 @@ inference_speed: True
 quantization:
   methods:
     - "fuse_bn"
+    - "ptq"
+    # - "qat"
   ptq:
-    examples_limit: 100
+    batches_limit: 250
   quant_config:
     dummy_input_shape: [1, 3, 224, 224]
     is_per_tensor: True
     is_asymmetric: True
     backend: "qnnpack"
     disable_requantization_for_cat: True
+    use_cle: True
+    overwrite_set_ptq: True
+
+trainer:
+  min_epochs: 1
+  max_epochs: 5

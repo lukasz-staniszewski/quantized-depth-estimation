@@ -10,8 +10,9 @@ from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 
-from utils.quantization import (
+from src.utils.quantization import (
     QuantizerConfig,
+    calc_inference_speed,
     get_model_quantized,
     get_model_size_mb,
     prepare_for_QAT,
@@ -34,46 +35,64 @@ from src.utils import (
 log = RankedLogger(__name__, rank_zero_only=True)
 
 
+def _get_model_for_quantization(cfg: DictConfig, ckpt_path: str | None = None) -> torch.nn.Module:
+    model: torch.nn.Module = hydra.utils.instantiate(cfg.model.net)
+    if ckpt_path is None:
+        return model
+    state_dict: Dict = torch.load(ckpt_path)["state_dict"]
+    if list(state_dict.keys())[0].startswith("net."):
+        state_dict = {k[4:]: v for k, v in state_dict.items()}
+    model.load_state_dict(state_dict)
+    return model
+
+
 def _quantize(
-    module: LightningModule, cfg: DictConfig, datamodule: LightningDataModule, trainer: Trainer
+    module: LightningModule,
+    cfg: DictConfig,
+    datamodule: LightningDataModule,
+    trainer: Trainer,
+    ckpt_path: str | None = None,
 ) -> Tuple[LightningModule, Path]:
     """Performs quantization based on chosen methods."""
     log.info("Starting quantization...")
+    model = _get_model_for_quantization(cfg=cfg, ckpt_path=ckpt_path)
+
     quant_path = Path(cfg.paths.output_dir) / "quant"
     if not os.path.exists(quant_path):
         os.makedirs(quant_path, exist_ok=True)
+
     quantization_methods = cfg.quantization.methods
     quantizer = None
-    ckpt_path = None
+
+    datamodule.setup()
     quant_config = QuantizerConfig(**cfg.quantization.quant_config)
-    model = module.net
     if "fuse_bn" in quantization_methods:
         log.info("FuseBatchNorm Quantization...")
         model = quantize_fuse_bn(model)
+
     if "ptq" in quantization_methods:
         log.info("Performing PTQ...")
         device = "cuda" if cfg.trainer.accelerator == "gpu" else "cpu"
-        datamodule.setup()
         model, quantizer = quantize_PTQ(
             model=model,
             work_dir=quant_path,
             quant_config=quant_config,
-            n_ptq_examples=cfg.quantization.ptq.examples_limit,
+            n_ptq_batches_limit=cfg.quantization.ptq.batches_limit,
             device=device,
             dataloader=datamodule.train_dataloader(),
             quantizer=quantizer,
         )
         log.info("PTQ Finished...")
+
     if "qat" in quantization_methods:
         log.info("Performing QAT...")
         model, quantizer = prepare_for_QAT(
-            model=model, work_dir=quant_path, quant_config=quant_config, quantizer=quantizer
+            model=model, work_dir=quant_path, quant_config=quant_config, quantizer=quantizer, device=device
         )
+        module.net = model
         log.info("Starting training!")
-        trainer.fit(model=model, datamodule=datamodule)
-        ckpt_path = trainer.checkpoint_callback.best_model_path
-        if ckpt_path:
-            model.load_state_dict(ckpt_path)
+        trainer.fit(model=module, datamodule=datamodule)
+        model = module.net
         log.info("QAT Finished...")
 
     if quantizer:
@@ -82,6 +101,7 @@ def _quantize(
         quantized_model = model
     model_path = quant_path / f"{'_'.join(quantization_methods)}_qmodel.pth"
     torch.save(quantized_model.state_dict(), model_path)
+    log.info(f"Saving quantized model to {model_path}")
     module.net = quantized_model
     return module, model_path
 
@@ -91,7 +111,7 @@ def quantize(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Quantize the model. After all, it evaluates the model.
 
     :param cfg: A DictConfig configuration composed by Hydra.
-    :return: A tuple with metrics and dict with all instantiated objects. # TODO
+    :return: A tuple with metrics and dict with all instantiated objects.
     """
     # set seed for random number generators in pytorch, numpy and python.random
     if cfg.get("seed"):
@@ -105,9 +125,8 @@ def quantize(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
     log.info(f"Instantiating model <{cfg.model._target_}>")
     model: LightningModule = hydra.utils.instantiate(cfg.model)
-    model.load_state_dict(torch.load(cfg.get("ckpt_path"))["state_dict"])
 
-    log.info(f"Model size before quantization: {get_model_size_mb(model):.3f} MB")
+    log.info(f"Model size before quantization: {get_model_size_mb(model.net):.3f} MB")
 
     log.info("Instantiating callbacks...")
     callbacks: List[Callback] = instantiate_callbacks(cfg.get("callbacks"))
@@ -131,18 +150,23 @@ def quantize(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         log.info("Logging hyperparameters!")
         log_hyperparameters(object_dict)
 
-    qmodel, path = _quantize(module=model, cfg=cfg, datamodule=datamodule, trainer=trainer)
-    log.info(f"Model size after quantization: {get_model_size_mb(model):.3f} MB")
+    model, path = _quantize(
+        module=model, cfg=cfg, datamodule=datamodule, trainer=trainer, ckpt_path=cfg.get("ckpt_path")
+    )
+    log.info(f"Model size after quantization: {get_model_size_mb(model.net):.3f} MB")
 
     if cfg.get("test"):
         log.info("Starting testing!")
+
+        cfg.trainer.accelerator = "cpu"
+        tester: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
         datamodule.batch_size_per_device = 1
-        trainer.test(model=qmodel, datamodule=datamodule, ckpt_path=None)
+        tester.test(model=model, dataloaders=datamodule.test_dataloader(), ckpt_path=None)
         log.info(f"Best ckpt path: {path}")
 
     if cfg.get("inference_speed"):
         log.info("Calculating mean inference speed...")
-        model.calc_inference_speed()
+        calc_inference_speed(model=model.net, dataloader=datamodule.test_dataloader())
 
     test_metrics = trainer.callback_metrics
 
