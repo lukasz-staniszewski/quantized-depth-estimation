@@ -5,14 +5,14 @@
 
 defaults:
   - override /data: nyu
-  - override /model: effnet_bifpn
+  - override /model: efficient_ffnet
   - override /callbacks: default
   - override /trainer: gpu
 
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["nyu", "effnet_bifpn"]
+tags: ["nyu", "efficient_ffnet"]
 seed: 420
 
 trainer:
@@ -23,8 +23,8 @@ trainer:
 logger:
   wandb:
     tags: ${tags}
-    group: "nyu_effbifpn"
+    group: "nyu_efficient_ffnet"
 
 data:
-  batch_size: 128
+  batch_size: 64
   num_workers: 8

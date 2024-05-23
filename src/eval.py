@@ -9,6 +9,7 @@ from omegaconf import DictConfig
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 from src.utils import RankedLogger, extras, instantiate_loggers, log_hyperparameters, task_wrapper
+from src.utils.quantization import calc_inference_speed
 
 log = RankedLogger(__name__, rank_zero_only=True)
 
@@ -52,8 +53,9 @@ def evaluate(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     log.info("Starting testing!")
     trainer.test(model=model, datamodule=datamodule, ckpt_path=cfg.ckpt_path)
 
-    # for predictions use trainer.predict(...)
-    # predictions = trainer.predict(model=model, dataloaders=dataloaders, ckpt_path=cfg.ckpt_path)
+    if cfg.get("inference_speed"):
+        log.info("Calculating mean inference speed...")
+        calc_inference_speed(model=model.net, dataloader=datamodule.test_dataloader())
 
     metric_dict = trainer.callback_metrics
 

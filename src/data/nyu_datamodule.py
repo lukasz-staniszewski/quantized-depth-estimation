@@ -58,6 +58,7 @@ class NYUDataModule(LightningDataModule):
         num_workers: int = 1,
         pin_memory: bool = False,
         input_size: Tuple[int, int] = (224, 224),
+        mask_final_size: Tuple[int, int] = (56, 56),
     ) -> None:
         """Initialize a `FashionMNISTDataModule`.
 
@@ -96,7 +97,7 @@ class NYUDataModule(LightningDataModule):
 
         self.batch_size_per_device = batch_size
         self.input_size = input_size
-        self.mask_final_size = (int(input_size[0] / 4), int(input_size[1] / 4))
+        self.mask_final_size = mask_final_size
 
     def prepare_data(self) -> None:
         """Download data if needed. Lightning ensures that `self.prepare_data()` is called only

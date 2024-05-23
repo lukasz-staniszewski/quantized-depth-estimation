@@ -2,6 +2,8 @@ from typing import Any, Dict, Tuple
 
 import torch
 from lightning import LightningModule
+from torch.profiler import ProfilerActivity, profile, record_function, schedule
+from torch.utils.data import DataLoader
 from torchmetrics import MaxMetric, MeanMetric, MinMetric
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 from torchmetrics.regression import MeanSquaredError

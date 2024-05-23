@@ -1,0 +1,18 @@
+_target_: src.models.unet_nyu_module.UNetNYUModule
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.01
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  patience: 5
+
+net:
+  _target_: src.models.components.efficient_ffnet.EfficientFFNetC
+
+# compile model for faster training with pytorch 2.0
+compile: false
