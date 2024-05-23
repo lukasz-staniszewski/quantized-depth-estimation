@@ -1,46 +1,30 @@
 # @package _global_
 
-# specify here default configuration
-# order of defaults determines the order in which configs override each other
 defaults:
   - _self_
   - data: nyu
   - model: nyu_efffnet
   - callbacks: default
-  - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
+  - logger: wandb
   - trainer: gpu
   - paths: default
   - extras: default
   - hydra: default
 
-  # experiment configs allow for version control of specific hyperparameters
-  # e.g. best hyperparameters for given model and datamodule
   - experiment: nyu_efffnet
 
-  # config for hyperparameter optimization
   - hparams_search: null
 
-  # optional local config for machine/user specific settings
-  # it's optional since it doesn't need to exist and is excluded from version control
   - optional local: default
 
-  # debugging config (enable through command line, e.g. `python train.py debug=default)
   - debug: null
 
-# task name, determines output directory path
 task_name: "quant"
-# logger: csv
 
-# tags to help you identify your experiments
-# you can overwrite this in experiment configs
-# overwrite from command line with `python train.py tags="[first_tag, second_tag]"`
 tags: ["dev"]
 
-# evaluate on test set, using best model weights achieved during training
-# lightning chooses best weights based on the metric specified in checkpoint callback
 test: True
 
-# seed for random number generators in pytorch, numpy and python.random
 seed: 42
 
 ckpt_path: null
@@ -49,7 +33,7 @@ inference_speed: True
 
 quantization:
   methods:
-    - "fuse_bn"
+    # - "fuse_bn"
     - "ptq"
     - "qat"
   ptq:
@@ -58,7 +42,7 @@ quantization:
     max_epochs: 10
   quant_config:
     dummy_input_shape: [1, 3, 224, 224]
-    is_per_tensor: True
+    is_per_tensor: False
     is_asymmetric: True
     backend: "qnnpack"
     disable_requantization_for_cat: True

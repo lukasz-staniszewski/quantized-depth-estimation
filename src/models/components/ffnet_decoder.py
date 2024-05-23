@@ -6,7 +6,7 @@ from src.models.components.convbnrelu import ConvBNReLU
 
 
 class AdapterConv(nn.Module):
-    """AdapterConv for Fuse-Free Network."""
+    """AdapterConv for FFNet."""
 
     def __init__(self, in_channels=[256, 512, 1024, 2048], out_channels=[64, 128, 256, 512]):
         super(AdapterConv, self).__init__()
@@ -19,6 +19,7 @@ class AdapterConv(nn.Module):
             )
 
     def forward(self, x):
+        """Forward method for AdapterConv."""
         out = []
         for k in range(len(self.adapter_conv)):
             out.append(self.adapter_conv[k](x[k]))
@@ -26,7 +27,7 @@ class AdapterConv(nn.Module):
 
 
 class UpsampleCat(nn.Module):
-    """UpsampleCat for Fuse-Free Network."""
+    """UpsampleCat for FFNet."""
 
     def __init__(self, upsample_kwargs={"mode": "bilinear", "align_corners": True}):
         super(UpsampleCat, self).__init__()
@@ -43,7 +44,7 @@ class UpsampleCat(nn.Module):
 
 
 class UpBranch(nn.Module):
-    """UpBranch in Fuse-Free Network."""
+    """UpBranch in FFNet."""
 
     def __init__(
         self,
@@ -67,6 +68,7 @@ class UpBranch(nn.Module):
         self.out_channels = out_channels
 
     def forward(self, x):
+        """Forward method for UpBranch."""
         feat4, feat8, feat16, feat32 = x
 
         smfeat_32 = self.fam_32_sm(feat32)
@@ -89,7 +91,7 @@ class UpBranch(nn.Module):
 
 
 class UpC(nn.Module):
-    """C-type head for Fuse Free Network."""
+    """C-type head for FFNet."""
 
     def __init__(self, in_channels, base_channels):
         super(UpC, self).__init__()
@@ -104,11 +106,12 @@ class UpC(nn.Module):
         )
 
     def forward(self, x):
+        """Forward method for UpC."""
         return self.layers(x)
 
 
 class DepthHeadC(nn.Module):
-    """Depth task head for Fuse Free Network."""
+    """Depth task head for FFNet."""
 
     def __init__(self, in_channels):
         super(DepthHeadC, self).__init__()
@@ -118,4 +121,5 @@ class DepthHeadC(nn.Module):
         )
 
     def forward(self, x):
+        """Forward method for DepthHeadC."""
         return self.layers(x)

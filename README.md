@@ -78,42 +78,8 @@ python src/train.py trainer.max_epochs=20 data.batch_size=64
 
 ## Quantization
 
-No quantization:
-```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃        Test metric        ┃       DataLoader 0        ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│         test/loss         │    0.00825385469943285    │
-│         test/mse          │    0.00825385469943285    │
-│         test/ssim         │    0.8089691996574402     │
-└───────────────────────────┴───────────────────────────┘
-[2024-05-17 11:54:30,412][__main__][INFO] - [rank: 0] Calculating mean inference speed
-STAGE:2024-05-17 11:54:31 1038662:1038662 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
-STAGE:2024-05-17 11:54:31 1038662:1038662 ActivityProfilerController.cpp:320] Completed Stage: Collection
-STAGE:2024-05-17 11:54:31 1038662:1038662 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
-                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
-                    ProfilerStep*        11.42%      31.256ms       100.00%     273.578ms      27.358ms            10
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
-```
+ONCE OBTAINING RESULTS, CHECK THESE LINKS:
 
-FuseBN:
-```
-
-Model size after quantization: 2.594 MB
-
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃        Test metric        ┃       DataLoader 0        ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│         test/loss         │    0.00825385469943285    │
-│         test/mse          │   0.008253855630755424    │
-│         test/ssim         │    0.8089691996574402     │
-└───────────────────────────┴───────────────────────────┘
-
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
-                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
-                    ProfilerStep*        10.17%      30.225ms       100.00%     297.107ms      29.711ms            10
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
-```
+- <https://github.com/alibaba/TinyNeuralNetwork/blob/b6c78946d09b853071f55fb9b481ff632ea9568c/examples/quantization/specific/vit/vit_post.py>
+- <https://github.com/alibaba/TinyNeuralNetwork/blob/b6c78946d09b853071f55fb9b481ff632ea9568c/examples/quantization/specific/mobileone/post.py>
+- <https://github.com/alibaba/TinyNeuralNetwork/blob/b6c78946d09b853071f55fb9b481ff632ea9568c/examples/quantization/specific/mobileone/qat.py>

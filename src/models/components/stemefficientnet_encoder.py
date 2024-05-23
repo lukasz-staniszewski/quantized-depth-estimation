@@ -6,7 +6,7 @@ from src.models.components.convbnrelu import ConvBNReLU
 
 
 class StemEfficientNetEncoder(nn.Module):
-    """EfficientNet (B0): https://arxiv.org/pdf/1905.11946.pdf suited for UNet network encoder"""
+    """EfficientNet (B0): https://arxiv.org/pdf/1905.11946.pdf suited to be UNet network encoder"""
 
     def __init__(self):
         """Constructs encoder from EfficientNetB0."""
