@@ -1,33 +1,39 @@
-# --------- pytorch --------- #
-torch>=2.0.0
-torchvision>=0.15.0
-lightning>=2.0.0
-torchmetrics>=0.11.4
 albumentations==1.4.1
-
-# --------- hydra --------- #
-hydra-core==1.3.2
+black==24.2.0
+efficientnet-pytorch==0.7.1
+huggingface-hub==0.21.4
 hydra-colorlog==1.2.0
+hydra-core==1.3.2
 hydra-optuna-sweeper==1.2.0
-
-# --------- loggers --------- #
-wandb
-
-# --------- quantize -------- #
-TinyNeuralNetwork @ git+https://github.com/alibaba/TinyNeuralNetwork.git@fb56fd944aa80bd48f1ef48970eb07286a64fdad
-
-# --------- notebooks ---------- #
-ipykernel
+isort==5.13.2
 jupyter==1.0.0
+kaggle==1.6.6
+lightning==2.2.1
+lightning-utilities==0.10.1
 notebook==7.1.2
-
-# --------- others --------- #
-rootutils       # standardizing the project root setup
-pre-commit      # hooks for applying linters on commit
-rich            # beautiful text formatting in terminal
-pytest          # tests
-sh            # for running bash commands in some tests (linux/macos only)
-tqdm
-pydantic
-kaggle
-pillow
+numpy==1.26.4
+omegaconf==2.3.0
+optuna==2.10.1
+pandas==2.2.1
+pillow==10.2.0
+pre-commit==3.6.2
+pydantic==2.7.1
+pytest==8.1.1
+python-dotenv==1.0.1
+pytorch-lightning==2.2.1
+rootutils==1.0.7
+safetensors==0.4.2
+scikit-image==0.22.0
+scikit-learn==1.4.1.post1
+scipy==1.12.0
+segmentation-models-pytorch==0.3.3
+tensorboard==2.16.2
+TinyNeuralNetwork==0.1.0.20240426110442+fb56fd944aa80bd48f1ef48970eb07286a64fdad
+torch==2.2.1
+torchmetrics==1.3.1
+torchvision==0.17.1
+tornado==6.4
+tqdm==4.66.2
+triton==2.2.0
+virtualenv==20.25.1
+wandb==0.16.4
