@@ -15,9 +15,9 @@ from src.utils.quantization import (
     calc_inference_speed,
     get_model_quantized,
     get_model_size_mb,
-    prepare_for_QAT,
     quantize_fuse_bn,
     quantize_PTQ,
+    quantize_QAT,
 )
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -61,18 +61,19 @@ def _quantize(
     if not os.path.exists(quant_path):
         os.makedirs(quant_path, exist_ok=True)
 
+    quant_config = QuantizerConfig(**cfg.quantization.quant_config)
     quantization_methods = cfg.quantization.methods
     quantizer = None
+    device = "cuda" if cfg.trainer.accelerator == "gpu" else "cpu"
 
     datamodule.setup()
-    quant_config = QuantizerConfig(**cfg.quantization.quant_config)
+
     if "fuse_bn" in quantization_methods:
         log.info("FuseBatchNorm Quantization...")
         model = quantize_fuse_bn(model)
 
     if "ptq" in quantization_methods:
         log.info("Performing PTQ...")
-        device = "cuda" if cfg.trainer.accelerator == "gpu" else "cpu"
         model, quantizer = quantize_PTQ(
             model=model,
             work_dir=quant_path,
@@ -86,19 +87,25 @@ def _quantize(
 
     if "qat" in quantization_methods:
         log.info("Performing QAT...")
-        model, quantizer = prepare_for_QAT(
-            model=model, work_dir=quant_path, quant_config=quant_config, quantizer=quantizer, device=device
+        model, quantizer = quantize_QAT(
+            module=module,
+            model=model,
+            trainer=trainer,
+            datamodule=datamodule,
+            work_dir=quant_path,
+            quant_config=quant_config,
+            quantizer=quantizer,
+            device=device,
         )
-        module.net = model
-        log.info("Starting training!")
-        trainer.fit(model=module, datamodule=datamodule)
-        model = module.net
         log.info("QAT Finished...")
 
     if quantizer:
+        model.apply(torch.quantization.disable_observer)
+        model.apply(torch.quantization.enable_fake_quant)
         quantized_model = get_model_quantized(model=model)
     else:
         quantized_model = model
+
     model_path = quant_path / f"{'_'.join(quantization_methods)}_qmodel.pth"
     torch.save(quantized_model.state_dict(), model_path)
     log.info(f"Saving quantized model to {model_path}")
@@ -135,6 +142,9 @@ def quantize(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     logger: List[Logger] = instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
+    if cfg.quantization.qat.max_epochs:
+        cfg.trainer.min_epochs = 1
+        cfg.trainer.max_epochs = cfg.quantization.qat.max_epochs
     trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
 
     object_dict = {

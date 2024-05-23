@@ -7,7 +7,7 @@ defaults:
   - data: nyu
   - model: nyu_efffnet
   - callbacks: default
-  - logger: csv # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
+  - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
   - trainer: gpu
   - paths: default
   - extras: default
@@ -29,7 +29,7 @@ defaults:
 
 # task name, determines output directory path
 task_name: "quant"
-logger: csv
+# logger: csv
 
 # tags to help you identify your experiments
 # you can overwrite this in experiment configs
@@ -51,9 +51,11 @@ quantization:
   methods:
     - "fuse_bn"
     - "ptq"
-    # - "qat"
+    - "qat"
   ptq:
     batches_limit: 250
+  qat:
+    max_epochs: 10
   quant_config:
     dummy_input_shape: [1, 3, 224, 224]
     is_per_tensor: True
@@ -62,7 +64,3 @@ quantization:
     disable_requantization_for_cat: True
     use_cle: True
     overwrite_set_ptq: True
-
-trainer:
-  min_epochs: 1
-  max_epochs: 5

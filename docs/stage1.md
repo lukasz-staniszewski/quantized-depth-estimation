@@ -225,3 +225,253 @@ Size:
 ```sh
 Model size after quantization: 1.377 MB
 ```
+
+<h3> Per Channel PTQ+QAT </h3>
+- Calibration done for 250 batches
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Test metric        ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         test/loss         │   0.008601336739957333    │
+│         test/mse          │   0.008601341396570206    │
+│         test/ssim         │    0.8127702474594116     │
+└───────────────────────────┴───────────────────────────┘
+```
+
+Speed:
+
+```sh
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+                    ProfilerStep*         3.69%      40.727ms       100.00%        1.104s     110.375ms            10
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+```
+
+Size:
+
+```sh
+Model size after quantization: 1.607 MB
+```
+
+<h3> Per Channel QAT </h3> (ZZSN) <-> TODO
+- Calibration done for 250 batches
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Test metric        ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         test/loss         │   0.011250432580709457    │
+│         test/mse          │    0.01125043909996748    │
+│         test/ssim         │    0.7697491645812988     │
+└───────────────────────────┴───────────────────────────┘
+```
+
+Speed:
+
+```sh
+---------------------------------  ------------  ------------  ------------  ------------  ------------ ------------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg
+  # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+                    ProfilerStep*         3.87%      41.773ms       100.00%        1.079s     107.894ms            10
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+```
+
+Size:
+
+```sh
+Model size after quantization: 1.607 MB
+```
+
+<h3> Fuse BN + Per Channel PTQ + Per Channel QAT </h3>
+- Calibration done for 250 batches
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Test metric        ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         test/loss         │   0.009217193350195885    │
+│         test/mse          │   0.009217188693583012    │
+│         test/ssim         │    0.7697322368621826     │
+└───────────────────────────┴───────────────────────────┘
+```
+
+Speed:
+
+```sh
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg
+ # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+                    ProfilerStep*         3.92%      43.593ms       100.00%        1.112s     111.207ms
+         10
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+```
+
+Size:
+
+```sh
+Model size after quantization: 1.605 MB
+```
+
+<h3> Fuse BN + Per Channel QAT </h3>
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Test metric        ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         test/loss         │   0.010503361001610756    │
+│         test/mse          │   0.010503357276320457    │
+│         test/ssim         │     0.756125271320343     │
+└───────────────────────────┴───────────────────────────┘
+```
+
+Speed:
+
+```sh
+---------------------------------  ------------  ------------  ------------  ------------  ------------  -
+-----------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+                    ProfilerStep*         3.71%      41.604ms       100.00%        1.122s     112.216ms            10
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------
+```
+
+Size:
+
+```sh
+Model size after quantization: 1.605 MB
+```
+
+<h3> Fuse BN + Per Tensor QAT </h3>
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Test metric        ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         test/loss         │    0.0205414816737175     │
+│         test/mse          │   0.020541485399007797    │
+│         test/ssim         │    0.6926639676094055     │
+└───────────────────────────┴───────────────────────────┘
+```
+
+Speed:
+
+```sh
+---------------------------------  ------------  ------------  ------------  ------------  ------------
+------------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg
+  # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------
+------------
+                    ProfilerStep*         3.48%      38.534ms       100.00%        1.109s     110.852ms
+          10
+---------------------------------  ------------  ------------  ------------  ------------  ------------
+------------
+```
+
+Size:
+
+```sh
+Model size after quantization: 1.377 MB
+```
+
+# LEFT TO DO:
+
+
+<h3> Per Tensor PTQ + Per Tensor QAT </h3>
+- Calibration done for 250 batches
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+```
+
+Speed:
+
+```sh
+```
+
+Size:
+
+```sh
+```
+
+
+<h3> Fuse BN + Per Tensor PTQ + Per Tensor QAT </h3>
+- Calibration done for 250 batches
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+```
+
+Speed:
+
+```sh
+```
+
+Size:
+
+```sh
+```
+
+<h3> Per Tensor QAT </h3>
+- We used `qnnpack` as quantization backend
+- Applied Cross Layer Equalization
+- QAT for 10 epochs
+
+Metrics:
+
+```sh
+```
+
+Speed:
+
+```sh
+```
+
+Size:
+
+```sh
+```
+
+
+ONCE OBTAINING RESULTS, CHECK THESE LINKS:
+
+- <https://github.com/alibaba/TinyNeuralNetwork/blob/b6c78946d09b853071f55fb9b481ff632ea9568c/examples/quantization/specific/vit/vit_post.py>
+- <https://github.com/alibaba/TinyNeuralNetwork/blob/b6c78946d09b853071f55fb9b481ff632ea9568c/examples/quantization/specific/mobileone/post.py>
+- <https://github.com/alibaba/TinyNeuralNetwork/blob/b6c78946d09b853071f55fb9b481ff632ea9568c/examples/quantization/specific/mobileone/qat.py>

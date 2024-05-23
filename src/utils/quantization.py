@@ -4,13 +4,18 @@ from typing import List, Optional, Tuple
 
 import torch
 import torch.ao.quantization.quantize_fx as quantize_fx
+from lightning import LightningDataModule, LightningModule, Trainer
 from pydantic import BaseModel
 from tinynn.graph.quantization.algorithm.cross_layer_equalization import cross_layer_equalize
 from tinynn.graph.quantization.fake_quantize import set_ptq_fake_quantize
 from tinynn.graph.quantization.quantizer import QATQuantizer
-from torch.profiler import ProfilerActivity, profile, record_function, schedule
+from torch.profiler import ProfilerActivity, profile, schedule
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+
+from src.utils import RankedLogger
+
+log = RankedLogger(__name__, rank_zero_only=True)
 
 
 class QuantizerConfig(BaseModel):
@@ -124,20 +129,21 @@ def quantize_PTQ(
     if quantizer is None:
         quantizer = create_quantizer(model=model, quant_config=quant_config, work_dir=work_dir, device=device)
         qmodel = quantizer.quantize()
+        qmodel.apply(torch.quantization.disable_fake_quant)
+        qmodel.apply(torch.quantization.enable_observer)
     else:
         qmodel = model
     qmodel.eval()
     qmodel.to(device)
-    qmodel.apply(torch.quantization.disable_fake_quant)
-    qmodel.apply(torch.quantization.enable_observer)
     qmodel = _ptq_calibration(model=qmodel, dataloader=dataloader, device=device, batches_limit=n_ptq_batches_limit)
-    qmodel.apply(torch.quantization.disable_observer)
-    qmodel.apply(torch.quantization.enable_fake_quant)
     return qmodel, quantizer
 
 
-def prepare_for_QAT(
+def quantize_QAT(
+    module: LightningModule,
     model: torch.nn.Module,
+    trainer: Trainer,
+    datamodule: LightningDataModule,
     work_dir: str,
     quant_config: QuantizerConfig,
     device: torch.device,
@@ -158,10 +164,16 @@ def prepare_for_QAT(
     if quantizer is None:
         quantizer = create_quantizer(model=model, quant_config=quant_config, work_dir=work_dir, device=device)
         qmodel = quantizer.quantize()
+        qmodel.apply(torch.quantization.disable_fake_quant)
+        qmodel.apply(torch.quantization.enable_observer)
     else:
         qmodel = model
-    qmodel = qmodel.eval()
-    qmodel = qmodel.apply(torch.quantization.disable_observer)
+
+    qmodel.eval()
+    module.net = qmodel
+    log.info("Starting training!")
+    trainer.fit(model=module, datamodule=datamodule)
+    qmodel = module.net
     return qmodel, quantizer
 
 
